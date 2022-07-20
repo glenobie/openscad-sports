@@ -9,19 +9,19 @@
 // 8  = interior back support
 // 9  = drawer label
 // 10 = side
-// 11 = back 
+// 11 = back
 // 12 = divider
 // value from 1 to 12. Change to make all the necessary models for the storage system
 MODEL_TO_MAKE = 1;
 
 // exterior depth of drawer
-DRAWER_DEPTH           = 160; 
+DRAWER_DEPTH           = 160;
 // exterior width of drawer
-DRAWER_WIDTH           = 50;   
+DRAWER_WIDTH           = 50;
 // exterior height of drawer front including label
-DRAWER_FRONT_HEIGHT    = 80;  
+DRAWER_FRONT_HEIGHT    = 80;
 // exterior height of drawer sides and back
-DRAWER_SIDES_HEIGHT    = 20;  
+DRAWER_SIDES_HEIGHT    = 20;
 // thickness of sides, back, and bottom of drawer
 DRAWER_THICKNESS       = 2;
 // thickness of front of drawer. Needs room for label tabs and magnet. Best not to edit
@@ -62,10 +62,10 @@ DRAWER_VERTICAL_TOLERANCE   = 1;
 DRAWER_DEPTH_TOLERANCE      = 1;
 
 // thickness of the bases
-BASE_HEIGHT             = 5; 
+BASE_HEIGHT             = 5;
 // thickness of base interior. Support holes will not penetrate this interior section
 BASE_INTERIOR_HEIGHT    = 1;
-// Number of bases a drawer will span over its depth. Should be at least 2. 
+// Number of bases a drawer will span over its depth. Should be at least 2.
 BASES_PER_DRAWER        = 2;
 // Save some filament by removing an interior rectangle from the base
 BASE_REMOVAL_PERCENTAGE = .60;
@@ -100,11 +100,11 @@ PROTRUSION_HEIGHT = 6;
 PROTRUSION_DEPTH = 4;
 // if PULL_TYPE == 3, percent of protrusion hollowed out
 PROTRUSION_HOLLOW_PCT = 0.6;
- 
+
 
 // List of text to engrave on the drawer label. Each element in list is a list of 4 values:  [text, size of text, font, distance from bottom of label to font base]
 TEXTS = [
-         ["MLB", 12, "Arial", 40], 
+         ["MLB", 12, "Arial", 40],
          ["1986", 8, "Arial", 14]
         ];
 // Depth to engrave the text into the label.
@@ -123,41 +123,41 @@ SUPPORT_WIDTH = 6;
 module profile()
 {
     square([1.5,SUPPORT_DEPTH]);
-    translate([1.5,0,0]) 
+    translate([1.5,0,0])
         square([3, 5.8]);
-    translate([4.5,0,0]) 
+    translate([4.5,0,0])
         square([1.5,SUPPORT_DEPTH]);
 }
 
 module support_exterior_front(height)
 {
-    translate([1,1,0]) 
+    translate([1,1,0])
         cube([4,4,height+4]);
-    translate([0,0,2]) 
+    translate([0,0,2])
         linear_extrude(height)
             profile();
-    
+
 }
 
 module support_exterior_middle(height)
 {
     support_exterior_front(height);
-    rotate(180) 
-        translate([-SUPPORT_WIDTH,0,0]) 
+    rotate(180)
+        translate([-SUPPORT_WIDTH,0,0])
             support_exterior_front(height);
 }
 
 module support_interior_middle(height)
 {
     support_exterior_middle(height);
-    translate([SUPPORT_WIDTH,0,0]) 
+    translate([SUPPORT_WIDTH,0,0])
         support_exterior_middle(height);
 }
 
 module support_interior_front(height)
 {
     support_exterior_front(height);
-    translate([SUPPORT_WIDTH,0,0]) 
+    translate([SUPPORT_WIDTH,0,0])
         support_exterior_front(height);
 }
 
@@ -180,7 +180,7 @@ module support_interior_back(height)
 // Base is two halves with holes and an interior.
 module base_half(width, depth, height)
 {
-    
+
     difference(){
         cube([width, depth, height]);
         translate([1,1,0])
@@ -191,7 +191,7 @@ module base_half(width, depth, height)
             cube([2,2,height]);
         translate([1,depth-3,0])
             cube([2,2,height]);
-    }    
+    }
 }
 
 module base(width, depth)
@@ -202,10 +202,10 @@ module base(width, depth)
     {
         union(){
             translate([0, 0, h])
-                cube([width,depth,BASE_INTERIOR_HEIGHT]); 
+                cube([width,depth,BASE_INTERIOR_HEIGHT]);
             translate([0,0,BASE_INTERIOR_HEIGHT + h])
                 base_half(width,depth, h );
-            
+
         }
         // remove a section of base to save filament
         translate([(width - width*BASE_REMOVAL_PERCENTAGE)/2,
@@ -221,13 +221,13 @@ module drawer(width, depth, height, side_height, thickness, front_thickness)
 {
     magnet_x = (width - MAGNET_WIDTH) / 2;
     label_z = height - (height*LABEL_AS_PCT_OF_DRAWER);
-    
+
     difference(){
         union(){
-            
+
             cube([width, depth, side_height]);
             cube([width, front_thickness, label_z]);
-            
+
             // protrusion
             if (PULL_TYPE == 3)
             {
@@ -237,8 +237,8 @@ module drawer(width, depth, height, side_height, thickness, front_thickness)
         }
         // hollow it out
         translate([thickness, front_thickness, thickness])
-            cube([width - (2 * thickness), 
-                  depth - thickness - front_thickness, 
+            cube([width - (2 * thickness),
+                  depth - thickness - front_thickness,
                   side_height]);
         // remove excess from where label will go
         translate([0, 0, label_z])
@@ -260,79 +260,79 @@ module drawer(width, depth, height, side_height, thickness, front_thickness)
         // protrusion
         if (PULL_TYPE == 3)
         {
-            translate([(width - PROTRUSION_WIDTH*PROTRUSION_HOLLOW_PCT)/2, 
-                        -PROTRUSION_DEPTH*PROTRUSION_HOLLOW_PCT, 
+            translate([(width - PROTRUSION_WIDTH*PROTRUSION_HOLLOW_PCT)/2,
+                        -PROTRUSION_DEPTH*PROTRUSION_HOLLOW_PCT,
                         PROTRUSION_HEIGHT -PROTRUSION_HEIGHT*PROTRUSION_HOLLOW_PCT])
-                cube([PROTRUSION_WIDTH*PROTRUSION_HOLLOW_PCT, 
-                      PROTRUSION_DEPTH*PROTRUSION_HOLLOW_PCT, 
+                cube([PROTRUSION_WIDTH*PROTRUSION_HOLLOW_PCT,
+                      PROTRUSION_DEPTH*PROTRUSION_HOLLOW_PCT,
                       PROTRUSION_HEIGHT*PROTRUSION_HOLLOW_PCT]);
         }
         // label tab left slot
-        translate([(LABEL_TAB_SIDE_OFFSET - LABEL_TAB_EXTRA_SPACE), 
-                   (LABEL_TAB_FRONT_OFFSET - LABEL_TAB_EXTRA_SPACE), 
+        translate([(LABEL_TAB_SIDE_OFFSET - LABEL_TAB_EXTRA_SPACE),
+                   (LABEL_TAB_FRONT_OFFSET - LABEL_TAB_EXTRA_SPACE),
                    label_z - LABEL_TAB_HEIGHT - LABEL_TAB_EXTRA_SPACE])
-            cube([LABEL_TAB_WIDTH + LABEL_TAB_EXTRA_SPACE, 
-                  LABEL_TAB_THICKNESS + LABEL_TAB_EXTRA_SPACE, 
+            cube([LABEL_TAB_WIDTH + LABEL_TAB_EXTRA_SPACE,
+                  LABEL_TAB_THICKNESS + LABEL_TAB_EXTRA_SPACE,
                   height]);
         //label tab right slot
-        translate([width - LABEL_TAB_SIDE_OFFSET - LABEL_TAB_WIDTH + LABEL_TAB_EXTRA_SPACE, 
-                   LABEL_TAB_FRONT_OFFSET - LABEL_TAB_EXTRA_SPACE, 
+        translate([width - LABEL_TAB_SIDE_OFFSET - LABEL_TAB_WIDTH + LABEL_TAB_EXTRA_SPACE,
+                   LABEL_TAB_FRONT_OFFSET - LABEL_TAB_EXTRA_SPACE,
                    label_z - LABEL_TAB_HEIGHT - LABEL_TAB_EXTRA_SPACE])
-            cube([LABEL_TAB_WIDTH + LABEL_TAB_EXTRA_SPACE, 
-                  LABEL_TAB_THICKNESS + LABEL_TAB_EXTRA_SPACE, 
+            cube([LABEL_TAB_WIDTH + LABEL_TAB_EXTRA_SPACE,
+                  LABEL_TAB_THICKNESS + LABEL_TAB_EXTRA_SPACE,
                   height]);
         // back divider slot left
         translate([thickness - DIVIDER_DEPTH - DIVIDER_TOLERANCE,
-                   depth - thickness - DIVIDER_THICKNESS - DIVIDER_TOLERANCE, 
+                   depth - thickness - DIVIDER_THICKNESS - DIVIDER_TOLERANCE,
                    thickness])
-            cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE, 
-                  DIVIDER_THICKNESS + DIVIDER_TOLERANCE, 
+            cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE,
+                  DIVIDER_THICKNESS + DIVIDER_TOLERANCE,
                   side_height]);
         // back divider slot right
         translate([width - thickness,
-                   depth-thickness - DIVIDER_THICKNESS - DIVIDER_TOLERANCE, 
+                   depth-thickness - DIVIDER_THICKNESS - DIVIDER_TOLERANCE,
                    thickness])
-            cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE, 
-                  DIVIDER_THICKNESS + DIVIDER_TOLERANCE, 
-                  side_height]);               
+            cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE,
+                  DIVIDER_THICKNESS + DIVIDER_TOLERANCE,
+                  side_height]);
         // other divider slots
         for (d = DIVIDER_SLOTS)
         {
             // left side
             translate([thickness - DIVIDER_DEPTH - DIVIDER_TOLERANCE, d, thickness])
-                cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE, 
-                     DIVIDER_THICKNESS + DIVIDER_TOLERANCE, 
+                cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE,
+                     DIVIDER_THICKNESS + DIVIDER_TOLERANCE,
                      side_height]);
             // right side
             translate([width - thickness, d, thickness])
-                cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE, 
-                     DIVIDER_THICKNESS + DIVIDER_TOLERANCE, 
-                     side_height]); 
-            
+                cube([DIVIDER_DEPTH + DIVIDER_TOLERANCE,
+                     DIVIDER_THICKNESS + DIVIDER_TOLERANCE,
+                     side_height]);
+
         }
-        
-        
+
+
     }
 }
 
 module drawer_label(width, thickness, height)
 {
-    
+
     difference(){
         union(){
             cube([width, height, thickness]);
             translate([LABEL_TAB_SIDE_OFFSET, -LABEL_TAB_HEIGHT, 0 ])
                 cube([LABEL_TAB_WIDTH, LABEL_TAB_HEIGHT, LABEL_TAB_THICKNESS ]);
-            translate([width - LABEL_TAB_SIDE_OFFSET - LABEL_TAB_WIDTH, 
+            translate([width - LABEL_TAB_SIDE_OFFSET - LABEL_TAB_WIDTH,
                        -LABEL_TAB_HEIGHT, 0])
             cube([LABEL_TAB_WIDTH, LABEL_TAB_HEIGHT, LABEL_TAB_THICKNESS ]);
         }
         for (t = TEXTS)
             translate([width/2, t[3], thickness-TEXT_DEPTH])
-            linear_extrude(TEXT_DEPTH) 
+            linear_extrude(TEXT_DEPTH)
                 text(t[0], t[1], t[2], halign="center");
     }
-        
+
 }
 
 module side(base_depth, height)
@@ -378,7 +378,7 @@ support_height = DRAWER_FRONT_HEIGHT + DRAWER_VERTICAL_TOLERANCE;
 if (MODEL_TO_MAKE == 1)
 {
     drawer(DRAWER_WIDTH, DRAWER_DEPTH, DRAWER_FRONT_HEIGHT,
-        DRAWER_SIDES_HEIGHT, DRAWER_THICKNESS, DRAWER_FRONT_THICKNESS); 
+        DRAWER_SIDES_HEIGHT, DRAWER_THICKNESS, DRAWER_FRONT_THICKNESS);
 }
 else if (MODEL_TO_MAKE == 2)
 {
