@@ -9,7 +9,7 @@ CARD_HEIGHT = 80;
 DECK_WIDTH = 1;
 
 // height of the tab beyond CARD_HEIGHT
-TAB_HEIGHT = 0;
+TAB_HEIGHT = 12;
 
 // distance the sides will extend up the sleeve as percent of sleeve height
 SIDES_PCT_OF_HEIGHT = 0.55;
@@ -18,7 +18,7 @@ SIDES_PCT_OF_HEIGHT = 0.55;
 THICKNESS = 1.2;
 
 // radius of the fillet at top of tab, set to zero if tab height is 0
-TAB_FILLET = 0;
+TAB_FILLET = 4;
 
 // where along side the band will start
 BAND_HEIGHT = 12;
@@ -32,13 +32,17 @@ BAND_ANGLE = 25;
 // added to band_width for cutout width on back
 EXTRA_CUT_WIDTH = 4;
 
-TOP_BANDS = true;
+
+// Add bands to the top (true) or leave it open (false)
+TOP_BANDS = false;
 
 // amount to chamfer off top corner of side
 SIDE_CHAMFER = 0;
 // radius of the fillet at the top of the back
-BACK_FILLET = 0;
+BACK_FILLET = 12;
 
+FILLET_LEFT = false;
+FILLET_RIGHT = true;
 //DO NOT EDIT, total width of the sleeve
 SLEEVE_WIDTH = CARD_WIDTH + 2*THICKNESS;
 
@@ -46,32 +50,38 @@ SLEEVE_WIDTH = CARD_WIDTH + 2*THICKNESS;
 SLEEVE_DEPTH = DECK_WIDTH + THICKNESS*2;
 
 // where along top the tab will start
-TAB_LEFT_START = 20;
+TAB_LEFT_START = 0;
 // where along top the tab will end
-TAB_RIGHT_END = 40;
+TAB_RIGHT_END = 30;
 
 // diameter of circle to cut out of back to save filament
 CUT_OUT_DIAMETER = 30;
 
 /**********************************/
 
-module left_back()
+module left_back(fillet=true)
 {
     factor = TOP_BANDS ? 2 : 1;
     back_height = (THICKNESS*factor + CARD_HEIGHT) / factor;
     cut_x_1 = (BAND_HEIGHT - EXTRA_CUT_WIDTH) / cos(BAND_ANGLE);
     cut_x_2 = (BAND_HEIGHT + BAND_WIDTH +  EXTRA_CUT_WIDTH) / cos(BAND_ANGLE);
+    cutoff = fillet ? BACK_FILLET : 0;
+
     difference()
     {
         union()
         {
-            cube([ SLEEVE_WIDTH/2, back_height - BACK_FILLET, THICKNESS]);
-            hull()
+            cube([ SLEEVE_WIDTH/2, back_height - cutoff, THICKNESS]);
+            if (fillet)
             {
-                translate([BACK_FILLET, back_height - BACK_FILLET, 0 ] )
+              hull()
+              {
+                  translate([BACK_FILLET, back_height - BACK_FILLET, 0 ] )
                     cylinder(h=THICKNESS, r=BACK_FILLET);
-                translate([SLEEVE_WIDTH/2 - BACK_FILLET, back_height - BACK_FILLET, 0 ] )
-                    cube([BACK_FILLET, BACK_FILLET, THICKNESS]);
+                  translate([SLEEVE_WIDTH/2 - BACK_FILLET, back_height - BACK_FILLET, 0 ] )
+                      cube([BACK_FILLET*2, BACK_FILLET, THICKNESS]);
+
+              }
             }
         }
         // cut around bands
@@ -152,9 +162,9 @@ module left_band()
     }
 }
 
-module front_left_parts()
+module front_left_parts(fillet=true)
 {
-  left_back();
+  left_back(fillet);
   left_side();
   left_band();
 
@@ -174,8 +184,8 @@ module front_left_parts()
 bottom();
 tab();
 
-front_left_parts();
+front_left_parts(FILLET_LEFT);
 translate([SLEEVE_WIDTH,0,0])
     mirror([1,0,0]){
-      front_left_parts();
+      front_left_parts(FILLET_RIGHT);
     }
