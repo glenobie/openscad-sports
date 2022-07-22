@@ -85,6 +85,66 @@ module PF()
                h_spacing=9, v_spacing=5, margin=0, holes_left=true, hole_radius=3, hole_depth=6,title="");
 }
 
+card_width = 40;
+card_height = 70;
+card_thickness = .6;
+
+wall_thickness = 1.6;
+base_thickness = 1.6;
+
+short_side_height = card_height *2/3;
+
+overhang = 2;
+
+padding_width = .2;
+padding_per_card = .05;
+
+side_width = wall_thickness*2+padding_width*2 + card_width;
+tray_depth = wall_thickness*3  + (padding_per_card + card_thickness)*10;
+tray_height = wall_thickness + card_height;
+
+tray_core_width = 4;
+
+
+module left_edge(height)
+{
+   // left edge
+   cube([wall_thickness, tray_depth, height]);
+   // left overhang front
+   cube([wall_thickness+overhang, wall_thickness, height]);
+   // left overhang back
+   translate([0,tray_depth-wall_thickness, 0])
+      cube([wall_thickness+overhang, wall_thickness, height]);
+}
+
+module tray_side()
+{
+   // bottom
+   cube([side_width, tray_depth, base_thickness]);
+   // front lip
+   cube([side_width, wall_thickness, overhang+wall_thickness]);
+   left_edge(tray_height);
+   translate([side_width, 0, 0])
+      mirror([1, 0, 0]) left_edge(short_side_height);
+   //back wall
+   translate([0, tray_depth - wall_thickness, 0])
+      cube([side_width, wall_thickness, short_side_height]);
+
+}
+
+module tray()
+{
+   union(){
+      mirror([1,0,0])
+         translate([0,0, 0])
+            tray_side();
+      translate([tray_core_width, 0, 0])
+         tray_side();
+      cube([tray_core_width, tray_depth, tray_height]);
+   }
+}
+
+
 PF_width = 38;
 PF();
 translate([PF_width+space_between, 0, 0])
@@ -107,3 +167,9 @@ leftover_space = space_between - visitor_width - home_width ;
 
 translate([PF_width + visitor_width, 0 , 0])
    cube([leftover_space, 18, HEIGHT]);
+
+translate([PF_width, 142, 0])
+   cube([space_between, 44,HEIGHT]);
+
+translate([-60,0,0])
+   tray();
